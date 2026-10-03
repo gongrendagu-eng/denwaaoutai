@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="電話セリフ">
+<title>電話応対 実技 かける側セリフ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F7FA; --sheet:#FFFFFF; --ink:#1E3350; --ink-soft:#4E6280;
+  --rule:#CBD3DE; --tint:#E7EEF7; --red:#C2332B; --red-soft:#FBE9E7;
+  --ok:#2F6F57; --ok-soft:#E4F1EB; --amber:#8A5A00; --amber-soft:#FFF3D6;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121A26; --sheet:#1A2433; --ink:#E3EAF4; --ink-soft:#9FB0C6;
+    --rule:#33425A; --tint:#22314A; --red:#FF7A6E; --red-soft:#3A2224;
+    --ok:#7FD1AE; --ok-soft:#1D3329; --amber:#F2C46B; --amber-soft:#3A2F17;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121A26; --sheet:#1A2433; --ink:#E3EAF4; --ink-soft:#9FB0C6;
+  --rule:#33425A; --tint:#22314A; --red:#FF7A6E; --red-soft:#3A2224;
+  --ok:#7FD1AE; --ok-soft:#1D3329; --amber:#F2C46B; --amber-soft:#3A2F17;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.7}
+h1,h2,h3{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header.top{border-bottom:3px solid var(--ink);padding-bottom:10px;margin-bottom:18px}
+header.top h1{margin:0;font-size:clamp(1.3rem,2.6vw,1.75rem);font-weight:900;letter-spacing:.04em}
+
+.layout{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:14px}
+.panel h2{font-size:1rem;margin:0 0 10px;font-weight:700}
+.side{display:flex;flex-direction:column;gap:16px;position:sticky;top:12px}
+@media (max-width:860px){.side{position:static}}
+
+/* segmented controls */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg button{cursor:pointer;border:0;background:var(--sheet);padding:8px 6px;font-weight:700;line-height:1.3}
+.seg button + button{border-left:1.5px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.seg.round button{padding:12px 6px;font-size:1.05rem}
+.seg.round small{display:block;font-weight:400;font-size:.78rem;opacity:.85}
+
+/* org chart picker */
+.org{display:flex;flex-direction:column;align-items:center}
+.org .trunk{width:2px;height:14px;background:var(--rule)}
+.org .branches{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:6px;width:100%;position:relative;padding-top:14px}
+.org .branches::before{content:"";position:absolute;top:0;left:calc(50% / var(--n,2));right:calc(50% / var(--n,2));height:2px;background:var(--rule)}
+.sheetsel{width:100%;padding:8px;border:1.5px solid var(--ink);border-radius:5px;background:var(--sheet);font-weight:700}
+.org .branch{display:flex;flex-direction:column;gap:6px;position:relative}
+.org .branch::before{content:"";position:absolute;top:-14px;left:50%;width:2px;height:14px;background:var(--rule)}
+.org .ka{text-align:center;font-weight:700;font-size:.85rem;color:var(--ink-soft);margin-bottom:2px}
+.pbtn{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;cursor:pointer;
+  background:var(--sheet);border:1.5px solid var(--rule);border-radius:5px;padding:5px 7px;line-height:1.3}
+.pbtn .nm{font-size:.92rem}
+.pbtn:hover{border-color:var(--ink-soft)}
+.pbtn .nm{font-weight:700}
+.pbtn .st{font-size:.7rem;color:var(--ink-soft)}
+.pbtn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.pbtn[aria-pressed="true"] .st{color:var(--sheet);opacity:.85}
+.pbtn.top{max-width:160px;align-items:center;text-align:center}
+.self{border:1.5px dashed var(--rule);border-radius:5px;padding:5px 7px;font-size:.85rem;color:var(--ink-soft);line-height:1.35}
+.rand{margin-top:12px;width:100%;cursor:pointer;background:transparent;border:1.5px solid var(--ink);border-radius:5px;padding:8px;font-weight:700}
+.rand:hover{background:var(--tint)}
+
+.fl{display:block;font-size:.85rem;color:var(--ink-soft);margin:0 0 4px}
+label.f{display:block;font-size:.85rem;color:var(--ink-soft);margin-bottom:8px}
+label.f input{display:block;width:100%;margin-top:3px;padding:7px 9px;border:1.5px solid var(--rule);border-radius:5px;background:var(--paper)}
+.hint{font-size:.78rem;color:var(--ink-soft);margin:6px 0 0}
+
+/* main */
+.main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.callcard{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center;
+  background:var(--tint);border:1px solid var(--rule);border-radius:6px;padding:12px 16px}
+.callcard dl{margin:0;display:flex;flex-wrap:wrap;gap:4px 28px}
+.callcard dt{font-size:.75rem;color:var(--ink-soft)}
+.callcard dd{margin:0;font-weight:700;font-size:1.15rem}
+.callcard dd small{font-weight:400;font-size:.8rem;color:var(--ink-soft);margin-left:6px}
+.btn{cursor:pointer;background:var(--sheet);border:1.5px solid var(--ink);border-radius:5px;padding:7px 12px;font-weight:700;white-space:nowrap}
+.btn:hover{background:var(--paper)}
+@media (max-width:520px){.callcard{grid-template-columns:1fr}}
+
+.status{display:grid;gap:10px}
+.status .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px}
+.status .who{font-size:1.4rem;font-weight:900;margin:0 6px 0 0}
+.badge{display:inline-block;font-weight:700;font-size:.88rem;padding:2px 10px;border-radius:4px;
+  background:var(--red-soft);color:var(--red);border:1px solid currentColor}
+.badge.msg{background:var(--ok-soft);color:var(--ok)}
+.status .sit{margin:0}
+.msgbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.msgbar select{padding:6px 8px;border:1.5px solid var(--ink);border-radius:5px;background:var(--sheet);max-width:100%}
+.checks{margin:0;padding:10px 12px 10px 30px;background:var(--amber-soft);border-radius:5px;font-size:.92rem}
+.checks li::marker{color:var(--amber)}
+
+/* script */
+.script{background:var(--sheet);border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.script .cols{display:grid;grid-template-columns:1fr 1fr;background:var(--ink);color:var(--sheet);font-weight:700;text-align:center}
+.script .cols div{padding:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--rule)}
+.row .cell{padding:10px 14px}
+.row .cell + .cell{border-left:1px solid var(--rule)}
+.row.call .c2{background:var(--tint);font-weight:700;font-size:1.05rem}
+.row.call.msg .c2{border-left:4px solid var(--ok)}
+.row .tag{display:none}
+.row .alt{display:block;font-size:.78rem;color:var(--ink-soft);font-weight:700}
+.hold{border-top:2px solid var(--ink);background:var(--paper);text-align:center;font-size:.85rem;color:var(--ink-soft);padding:5px}
+.v{background:linear-gradient(transparent 62%, var(--tint) 62%);padding:0 1px}
+.row.call .c2 .v{background:none;text-decoration:underline dotted;text-underline-offset:3px}
+.u{text-decoration:underline 2px var(--red);text-underline-offset:4px;color:var(--red);font-weight:700}
+.u .v{background:none}
+.legend{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.8rem;color:var(--ink-soft);margin-top:-6px}
+
+@media (max-width:620px){
+  .script .cols{display:none}
+  .row{grid-template-columns:1fr}
+  .row .cell:empty{display:none}
+  .row .cell + .cell{border-left:0}
+  .row .tag{display:block;font-size:.72rem;font-weight:700;color:var(--ink-soft);margin-bottom:2px}
+  .row.call .c2{border-left:4px solid var(--ink)}
+}
+.empty{padding:40px 20px;text-align:center;color:var(--ink-soft)}
+/* 教員用：伝言の制限 */
+.mfilter{display:grid;grid-template-columns:1fr;gap:2px}
+.mf{display:flex;gap:8px;align-items:center;font-size:.88rem;padding:3px 4px;border-radius:4px;cursor:pointer}
+.mf:hover{background:var(--tint)}
+.mf input{width:18px;height:18px;accent-color:var(--ink);flex:none}
+.mfbtns{margin-top:8px}
+/* 教員用：採点 */
+.script.t .cols,.script.t .row{grid-template-columns:1fr 112px 1fr}
+.script.t .row .cell.cm{padding:8px 6px;display:flex;align-items:flex-start;justify-content:center}
+.marks{display:flex;gap:4px}
+.mk{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--rule);background:var(--sheet);cursor:pointer;
+  font-weight:700;font-size:1rem;line-height:1;padding:0;color:var(--ink-soft)}
+.mk:hover{border-color:var(--ink-soft)}
+.mk-o[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--sheet)}
+.mk-t[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:var(--sheet)}
+.mk-x[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:var(--sheet)}
+.row.recv.m-o .c1{box-shadow:inset 4px 0 0 var(--ok)}
+.row.recv.m-t .c1{box-shadow:inset 4px 0 0 var(--amber)}
+.row.recv.m-x .c1{box-shadow:inset 4px 0 0 var(--red)}
+.tallybar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--sheet);border:1.5px solid var(--ink);border-radius:6px;padding:8px 12px}
+.tally{display:flex;flex-wrap:wrap;gap:6px 16px;font-weight:700;font-size:1.05rem}
+.tk.o{color:var(--ok)} .tk.t{color:var(--amber)} .tk.x{color:var(--red)}
+.tk:last-child{color:var(--ink-soft);font-weight:400;font-size:.9rem;align-self:center}
+@media (max-width:620px){
+  .script.t .row{grid-template-columns:1fr}
+  .script.t .row .cell.cm:empty,.script.t .row.call .cell.cm{display:none}
+  .script.t .row .cell.cm{justify-content:flex-start;padding:0 14px 10px}
+}
+
+/* iPad などタッチ操作向け */
+html{-webkit-text-size-adjust:100%}
+button,label.mf,select{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media (pointer:coarse){
+  .pbtn{padding:8px 8px;min-height:48px}
+  .seg button{min-height:46px}
+  .btn,.rand,.sheetsel,.msgbar select{min-height:44px}
+  label.f input{min-height:44px;font-size:16px}
+  .mf{padding:8px 6px}
+  .mf input{width:22px;height:22px}
+  .mk{width:44px;height:44px;font-size:1.15rem}
+  .script.t .cols,.script.t .row{grid-template-columns:1fr 156px 1fr}
+  .marks{gap:6px}
+}
+@media (pointer:coarse) and (max-width:620px){
+  .script.t .row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><h1>電話応対 実技　かける側のセリフ</h1></header>
+
+  <div class="layout">
+    <aside class="side">
+      <section class="panel">
+        <h2>状況設定シート</h2>
+        <select id="sheetSel" class="sheetsel" aria-label="状況設定シート"></select>
+      </section>
+
+      <section class="panel">
+        <h2>実技の回</h2>
+        <div class="seg round" id="roundSeg" role="group" aria-label="実技の回">
+          <button type="button" data-r="1" aria-pressed="true">1回目<small>折り返しを頼む</small></button>
+          <button type="button" data-r="2" aria-pressed="false">2回目<small>伝言を頼む</small></button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>呼び出す人を選ぶ</h2>
+        <div class="org" id="org"></div>
+        <button class="rand" id="randPerson" type="button">ランダムに選ぶ</button>
+      </section>
+
+      <section class="panel">
+        <h2>かける側の会社名</h2>
+        <div class="seg" id="lenSeg" role="group" aria-label="会社名の長さ">
+          <button type="button" data-l="s" aria-pressed="true">短い</button>
+          <button type="button" data-l="m" aria-pressed="false">中くらい</button>
+          <button type="button" data-l="l" aria-pressed="false">長い</button>
+        </div>
+        <p class="hint">会社名・名前・電話番号（全国）は、人を選ぶたびにランダムで決まります。</p>
+      </section>
+
+      <section class="panel">
+        <h2>受ける側</h2>
+        <label class="f">内定先企業名<input id="stuCo" type="text" placeholder="未入力なら【内定先企業名】"></label>
+        <label class="f">自分の名前<input id="stuName" type="text" placeholder="未入力なら【自分の名前】"></label>
+        <p class="hint">入力は任意です。セリフ内の表示が変わるだけです。</p>
+      </section>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="panel empty">左の組織図から、電話で呼び出す人を選んでください。</div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   状況設定シート（シートを増やすときは SHEETS に追加）
+   pattern：1=外出 2=休暇 3=出張 4=席を外している 5=電話中
+   ext：社外の人が呼ぶときの呼び方
+   ※同姓の人（女性の中田さん）と在席の人は選択肢から除外
+   ========================================================= */
+const SHEETS = [
+  {id:'s1', label:'状況設定シート①（1月17日・月）', today:17, wd:1, last:31, myDept:'販売二課',
+   top:{dept:'販売部'}, branches:['販売一課','販売二課','販売三課'],
+   people:[
+    {id:'yamanaka', name:'山中', title:'部長', ext:'部長', dept:'販売部', short:'出張（19日出社）', pattern:'3', day:'19',
+     status:'販売戦略会議に関する研修のため出張中。次の出社予定は水曜日（19日）',
+     checks:['出社日を「19日」と伝えているか','出張の理由（研修）まで話していないか']},
+    {id:'akimoto', name:'秋元', title:'課長', ext:'課長', dept:'販売一課', short:'外出（17時帰社）', pattern:'1', time:'17',
+     status:'得意先の川崎物産へ商品のクレームに対応するため外出中。17時帰社予定',
+     checks:['戻りの時刻を「17時」と伝えているか','外出の理由（クレーム対応）や取引先名を話していないか']},
+    {id:'miyahara', name:'宮原', title:'係長', ext:'係長', dept:'販売一課', short:'電話中', pattern:'5',
+     status:'得意先の新潟物産へ商品の説明のため電話中',
+     checks:['電話の相手先（新潟物産）を話していないか']},
+    {id:'morioka', name:'森岡', title:'', ext:'さん', dept:'販売一課', short:'交渉中（14時頃終了）', pattern:'4', time:'14',
+     status:'仕入先担当者と仕入価格の交渉中。14時頃終了予定',
+     checks:['「14時には戻る予定」と伝えているか','交渉中であることまで話していないか']},
+    {id:'matsuda', name:'松田', title:'', ext:'さん', dept:'販売一課', short:'外出（16時帰社）', pattern:'1', time:'16',
+     status:'仕入先の東京商事へ訪問中。16時に帰社予定',
+     checks:['戻りの時刻を「16時」と伝えているか','訪問先（東京商事）を話していないか']},
+    {id:'yamazaki', name:'山崎', title:'', ext:'さん', dept:'販売一課', short:'電話中', pattern:'5',
+     status:'取引先である川崎物産の高橋さんより質問があったため電話中',
+     checks:['電話の相手（川崎物産の高橋さん）を話していないか']},
+    {id:'nakata', name:'中田', title:'課長', ext:'課長', dept:'販売二課', short:'外出（18時帰社）', pattern:'1', time:'18',
+     status:'新製品のプレゼンテーションのため、得意先に外出中。18時帰社予定',
+     checks:['戻りの時刻を「18時」と伝えているか']},
+    {id:'mori', name:'森', title:'係長', ext:'係長', dept:'販売二課', short:'来客対応中', pattern:'4',
+     status:'OA機器の飛び込み営業マンの対応中',
+     checks:['来客中でも「席を外しております」と伝えているか']},
+    {id:'kaneko', name:'金子', title:'', ext:'さん', dept:'販売二課', short:'出張（18日出社）', pattern:'3', day:'18',
+     status:'得意先との商談のため出張中。明日（18日）は出社予定',
+     checks:['出社日を「18日」と伝えているか']},
+    {id:'miyanishi', name:'宮西', title:'課長', ext:'課長', dept:'販売三課', short:'営業課に呼ばれている', pattern:'4',
+     status:'同じフロアの営業課の課長に呼ばれている',
+     checks:['「席を外しております」と伝えているか']},
+    {id:'taguchi', name:'田口', title:'係長', ext:'係長', dept:'販売三課', short:'定例会議', pattern:'4',
+     status:'1月期定例会議に参加',
+     checks:['会議中でも「席を外しております」と伝えているか']},
+    {id:'yamaguchi', name:'山口', title:'', ext:'さん', dept:'販売三課', short:'打合せ中', pattern:'4',
+     status:'新人研修の実施にあたり、人事部と打合せ中',
+     checks:['打合せ中でも「席を外しております」と伝えているか']},
+    {id:'takahashi', name:'高橋', title:'', ext:'さん', dept:'販売三課', short:'休暇（24日出社）', pattern:'2', day:'24',
+     status:'リフレッシュ休暇中。24日（月）出社予定。急用の場合は携帯電話に電話して欲しい',
+     checks:['出社日を「24日」と伝えているか','携帯電話の番号を教えていないか']},
+    {id:'matsumoto', name:'松本', title:'', ext:'さん', dept:'販売三課', short:'トイレ', pattern:'4',
+     status:'トイレに行っている',
+     checks:['トイレとは言わず「席を外しております」と伝えているか']}
+   ]},
+  {id:'s2', label:'状況設定シート②（1月17日・月）', today:17, wd:1, last:31, myDept:'販売二課',
+   top:{dept:'販売部'}, branches:['販売一課','販売二課','販売三課'],
+   people:[
+    {id:'yamanaka', name:'山中', title:'部長', ext:'部長', dept:'販売部', short:'休暇（24日出社）', pattern:'2', day:'24',
+     status:'身内に不幸があったため帰省中。来週（24日）から出社予定',
+     checks:['出社日を「24日」と伝えているか','休んでいる理由まで話していないか']},
+    {id:'akimoto', name:'秋元', title:'課長', ext:'課長', dept:'販売一課', short:'取材対応中', pattern:'4',
+     status:'新商品に関する新聞取材の対応中',
+     checks:['取材中であることを言わず「席を外しております」と伝えているか']},
+    {id:'miyahara', name:'宮原', title:'係長', ext:'係長', dept:'販売一課', short:'広報課で打合せ', pattern:'4',
+     status:'打ち合わせのため広報課に行っている',
+     checks:['打合せ中でも「席を外しております」と伝えているか']},
+    {id:'morioka', name:'森岡', title:'', ext:'さん', dept:'販売一課', short:'電話中', pattern:'5',
+     status:'広報課へ販促ツールの確認のため電話中',
+     checks:['「他の電話に出ております」と伝えているか']},
+    {id:'matsuda', name:'松田', title:'', ext:'さん', dept:'販売一課', short:'外出（14時帰社）', pattern:'1', time:'14',
+     status:'資材調達の、仕入れ値交渉のため横浜商事へ訪問中。14時帰社予定',
+     checks:['戻りの時刻を「14時」と伝えているか','訪問先（横浜商事）を話していないか']},
+    {id:'yamazaki', name:'山崎', title:'', ext:'さん', dept:'販売一課', short:'休暇（24日出社）', pattern:'2', day:'24',
+     status:'父親の介護のため休暇中。来週（24日）から出社予定',
+     checks:['出社日を「24日」と伝えているか','休んでいる理由まで話していないか']},
+    {id:'nakata', name:'中田', title:'課長', ext:'課長', dept:'販売二課', short:'出張（19日出社）', pattern:'3', day:'19',
+     status:'新規出店候補地の観察のため出張中。19日（水）出社予定',
+     checks:['出社日を「19日」と伝えているか']},
+    {id:'mori', name:'森', title:'係長', ext:'係長', dept:'販売二課', short:'広報部と打合せ', pattern:'4',
+     status:'新商品について広報部と打ち合わせ',
+     checks:['打合せ中でも「席を外しております」と伝えているか']},
+    {id:'kaneko', name:'金子', title:'', ext:'さん', dept:'販売二課', short:'外出（16時帰社）', pattern:'1', time:'16',
+     status:'得意先へ新製品説明のため外出中。16時帰社予定',
+     checks:['戻りの時刻を「16時」と伝えているか']},
+    {id:'miyanishi', name:'宮西', title:'課長', ext:'課長', dept:'販売三課', short:'来客対応中（すぐ終わる）', pattern:'4',
+     status:'仕入先の担当者が挨拶に来社したため応接室で対応中。挨拶だけなので時間はかからない',
+     checks:['来客中でも「席を外しております」と伝えているか']},
+    {id:'taguchi', name:'田口', title:'係長', ext:'係長', dept:'販売三課', short:'所在不明（携帯あり）', pattern:'4',
+     status:'どこにいるのか分からないが、常に携帯電話を持ち歩いているので、すぐに連絡はつく',
+     checks:['所在不明でも「席を外しております」と伝えているか','携帯電話の番号を教えていないか']},
+    {id:'yamaguchi', name:'山口', title:'', ext:'さん', dept:'販売三課', short:'プロジェクト参加中', pattern:'4',
+     status:'新製品開発プロジェクトに参加',
+     checks:['「席を外しております」と伝えているか']},
+    {id:'takahashi', name:'高橋', title:'', ext:'さん', dept:'販売三課', short:'出張（20日出社）', pattern:'3', day:'20',
+     status:'社内プレゼンテーションのため出張中。3日後（20日）に出社する予定',
+     checks:['出社日を「20日」と伝えているか']},
+    {id:'matsumoto', name:'松本', title:'', ext:'さん', dept:'販売三課', short:'外出（17時帰社）', pattern:'1', time:'17',
+     status:'新製品開発による、取り扱い説明を受けるため本社に外出中。17時帰社予定',
+     checks:['戻りの時刻を「17時」と伝えているか']}
+   ]},
+  {id:'s0', label:'総務部シート（11月12日・水）', today:12, wd:3, last:30, myDept:'総務課',
+   top:{dept:'総務部'}, branches:['庶務課','総務課'],
+   people:[
+    {id:'yamanaka', name:'山中', title:'部長', ext:'部長', dept:'総務部', short:'打合せ中', pattern:'4',
+     status:'社内にいるが、人事部長と打合せ中', checks:['打合せ中でも「席を外しております」と伝えているか']},
+    {id:'akimoto', name:'秋元', title:'課長', ext:'課長', dept:'庶務課', short:'来客・商談中', pattern:'4',
+     status:'社内にいるが、来客があり商談中', checks:['来客中でも「席を外しております」と伝えているか']},
+    {id:'miyahara', name:'宮原', title:'係長', ext:'係長', dept:'庶務課', short:'他の電話中', pattern:'5',
+     status:'在席中だが、他の電話に出ている', checks:['「他の電話に出ております」と伝えているか']},
+    {id:'morioka', name:'森岡', title:'', ext:'さん', dept:'庶務課', short:'外出（18時戻り）', pattern:'1', time:'18',
+     status:'取引先へ外勤中で、18時に戻る予定。携帯電話を持っている',
+     checks:['戻りの時刻を「18時」と伝えているか','携帯電話の番号を教えていないか']},
+    {id:'yamazaki', name:'山崎', title:'', ext:'さん', dept:'庶務課', short:'休暇（14日出勤）', pattern:'2', day:'14',
+     status:'休暇中で旅行に行っている。14日（金）出勤予定', checks:['出勤日を「14日」と伝えているか']},
+    {id:'mori', name:'森', title:'係長', ext:'係長', dept:'総務課', short:'社内・所在不明', pattern:'4',
+     status:'社内にいるが、どこにいるか不明', checks:['所在不明でも「席を外しております」と伝えているか']},
+    {id:'kaneko', name:'金子', title:'', ext:'さん', dept:'総務課', short:'出張（17日出勤）', pattern:'3', day:'17',
+     status:'出張中。次の出勤予定は来週の月曜日（17日）。毎日夕刻に連絡がある', checks:['出勤日を「17日」と伝えているか']}
+   ]}
+];
+const PATTERN_NAME = {'1':'①不在（外出）','2':'②不在（休暇）','3':'③不在（出張）',
+  '4':'④職場内にいる（席を外している）','5':'⑤職場内にいる（電話中）'};
+
+/* ================= ランダム素材 ================= */
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const rint = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const digits = n => { let s = String(rint(2,9)); while (s.length < n) s += rint(0,9); return s; };
+const tail = n => { let s=''; while (s.length < n) s += rint(0,9); return s; };
+
+const S_PRE = ['青葉','東都','北斗','丸和','朝日','若葉','日の出','清流','三ツ星','大空','富士見','桜川','白鳥','松風',
+  '光陽','双葉','明星','旭','協和','大和','昭栄','東邦','新光','太陽','共栄','山陽','南海','紀州','常盤','高砂',
+  '錦','瑞穂','葵','千鳥','鶴見','銀河','翔栄','美浜','緑川','菱和','栄光','誠和','曙','黎明','宝山','白樺'];
+const S_SUF = ['商事','物産','工業','電機','産業','興産','商会','建設','運輸','印刷','化学','食品','精工','製菓',
+  '電設','技研','製作所','通商','薬品','紙業'];
+const M_WORD = ['サンライズ','グローバル','ミライ','アクア','フロンティア','ネクスト','オリオン','ハーモニー','パシフィック',
+  'クレスト','ルミナス','スマイル','アルファ','ユニオン','ブライト','セントラル','リバティ','ステラ','ひかり','あおぞら',
+  'みなと','さくら','つばさ','東洋','日本','中央','第一','やまびこ','コスモ','エース'];
+const M_BIZ = ['物流サービス','情報システム','精密機器','住宅販売','食品流通','電子工業','不動産販売','企画開発',
+  '通信サービス','医療機器','建設工業','印刷デザイン','ホームサービス','トレーディング','エンジニアリング',
+  'フードサービス','オフィス機器','環境サービス','電機製作所','化学工業','観光開発','産業機械'];
+const L_REG = ['東日本','西日本','北海道','東北','北関東','南関東','首都圏','中部','東海','北陸','信州','関西','近畿',
+  '中国','山陰','瀬戸内','四国','九州','南九州','沖縄','湘南','京阪神'];
+const L_K1 = ['グリーン','メディカル','インターナショナル','ビジネス','トータル','ライフ','クリエイティブ','スマート',
+  'デジタル','ファイン','ヘルスケア','アグリ','オフィス','ユニバーサル'];
+const L_K2 = ['エネルギーソリューションズ','サプライサービス','ロジスティクス','テクノロジーズ','コミュニケーションズ',
+  'マネジメントサービス','ホールディングス','システムインテグレーション','プランニング','ネットワークス','ケアサービス',
+  'エンジニアリング','リサーチアンドコンサルティング','サポートセンター'];
+const L_MID = ['総合','中央','第一','広域','共同','合同','総合開発'];
+const L_BIZ = ['設備工業','精密機器製作所','食品流通センター','建設コンサルタント','環境保全サービス','医療機器販売',
+  '農産物流通','情報システム開発','住宅設備販売','電気工事','産業廃棄物処理','観光開発','警備保障'];
+
+// 長さの目安：短い 3〜5文字／中くらい 8〜12文字／長い 15文字以上
+function makeCompany(len){
+  const gen = {
+    s: () => pick(S_PRE) + pick(S_SUF),
+    m: () => pick(M_WORD) + pick(M_BIZ),
+    l: () => Math.random() < .6 ? pick(L_REG) + pick(L_K1) + pick(L_K2) : pick(L_REG) + pick(L_MID) + pick(L_BIZ)
+  }[len];
+  const ok = { s: n => n <= 5, m: n => n >= 8 && n <= 12, l: n => n >= 15 }[len];
+  let name; do { name = gen(); } while (!ok(name.length));
+  return name;
+}
+
+// 名字（どのシートの社員とも重ならないもの）
+const STAFF = new Set(SHEETS.flatMap(s => s.people.map(p => p.name)).concat(['中田']));
+const SURNAMES = ['佐藤','鈴木','田村','伊藤','渡辺','小林','加藤','吉田','佐々木','清水','林','斎藤','井上','木村',
+  '石井','前田','藤井','岡本','長谷川','村上','近藤','坂本','遠藤','青木','藤田','西村','福田','太田','三浦','岡田',
+  '原田','小野','竹内','中島','和田','石川','上野','野口','菅原','久保','千葉','平野','大塚','桜井','内田','今井','河野']
+  .filter(n => !STAFF.has(n));
+
+const AREAS = [
+  ['03','東京'],['06','大阪'],
+  ['011','札幌'],['017','青森'],['018','秋田'],['019','盛岡'],['022','仙台'],['023','山形'],['024','福島'],['025','新潟'],
+  ['026','長野'],['027','前橋'],['028','宇都宮'],['029','水戸'],['042','八王子'],['043','千葉'],['045','横浜'],['048','さいたま'],
+  ['052','名古屋'],['053','浜松'],['054','静岡'],['058','岐阜'],['059','津'],['075','京都'],['076','金沢'],['077','大津'],
+  ['078','神戸'],['082','広島'],['086','岡山'],['087','高松'],['088','高知'],['089','松山'],['092','福岡'],['093','北九州'],
+  ['095','長崎'],['096','熊本'],['097','大分'],['098','那覇'],['099','鹿児島'],
+  ['0742','奈良'],['0776','福井'],['0852','松江'],['0857','鳥取'],['0985','宮崎'],['0952','佐賀'],['0166','旭川'],
+  ['0138','函館'],['0263','松本'],['0564','岡崎'],['0172','弘前'],['0898','今治'],['0956','佐世保'],
+  ['04992','伊豆大島'],['04996','八丈島'],['05769','白川村']
+];
+function makeTel(){
+  const [code, city] = pick(AREAS);
+  return {tel: `${code}-${digits(10 - code.length - 4)}-${tail(4)}`, city};
+}
+const makeMobile = () => `${pick(['090','080','070'])}-${digits(4)}-${tail(4)}`;
+
+const WD = ['日','月','火','水','木','金','土'];
+function makeDay(sh, exclude){
+  const wd = d => (sh.wd + d - sh.today + 70) % 7;
+  let d;
+  do { d = rint(sh.today + 1, sh.last); } while ([0,6].includes(wd(d)) || d === exclude);
+  return {d, text:`${d}日${WD[wd(d)]}曜日`};
+}
+const makeTime = () => pick(['10時','11時','13時','14時','15時','16時','17時','10時30分','11時30分','13時30分','14時30分','15時30分','16時30分']);
+
+/* ================= 伝言パターン（13個） ================= */
+const MESSAGES = [
+  {title:'新製品の説明で訪問', build:x=>({
+    call:[`「御社の新製品について詳細をお聞きしたいので、${x.d1}${x.t1}に伺いたいとお伝え願えますか」`],
+    rep:[`${x.d1}${x.t1}にこちらにお越しいただき、当社の新製品についてのご説明をいたしますということでよろしいでしょうか`]})},
+  {title:'午前中に電話がほしい', build:x=>({
+    call:[`「${x.d1}の午前中に電話をいただけるようお伝え願えますか」`, `「電話番号は${x.tel2}です」`],
+    rep:[`お電話番号は${x.tel2}でございますね。${x.d1}の午前中に、こちらの番号に${x.n}からお電話を差し上げるということでよろしいでしょうか`]})},
+  {title:'後任担当者の紹介', build:x=>({
+    call:[`「後任の担当者を紹介しに伺いたいので、${x.n}${x.ext}に来週の都合の良い日を教えて欲しいとお伝え願えますか」`],
+    rep:[`新担当者のご紹介で、お越しいただけるということでございますね。${x.n}から来週の都合の良い日をご連絡差し上げるということでよろしいでしょうか`]})},
+  {title:'新製品の案内で連絡する', build:x=>({
+    call:[`「是非、当社の新製品をご案内したいので、${x.d1}にご連絡いたしますとお伝え願えますか」`],
+    rep:[`御社の新製品のご案内で、${x.d1}にご連絡くださるということでしょうか`]})},
+  {title:'打合せの日時変更', build:x=>({
+    call:[`「${x.d1}${x.t1}に打合せをする予定だったのですが、所用が入ってしまったので、${x.d2}の${x.t2}に変更して欲しいとお伝え願えますか」`],
+    rep:[`${x.d1}${x.t1}の打合せのご予定を${x.d2}の${x.t2}にご変更なさりたいということでよろしいでしょうか`,
+         `打合せのご予定を${x.d1}${x.t1}から${x.d2}の${x.t2}にご変更なさりたいということでよろしいでしょうか`]})},
+  {title:'携帯電話の番号変更', build:x=>({
+    call:[`「携帯電話の番号が${x.mob}に変わったとお伝え願えますか」`],
+    rep:[`携帯電話の番号が${x.mob}にご変更なさったということでよろしいでしょうか`,
+         `変更後のお電話番号は、${x.mob}でよろしいでしょうか`]})},
+  {title:'発注数の変更', build:x=>({
+    call:[`「先日発注した商品の数を${x.q1}個から${x.q2}個に変更したいとお伝え願えますか」`],
+    rep:[`先日ご注文いただいた商品の数を${x.q1}個から${x.q2}個にご変更なさるということでよろしいでしょうか`]})},
+  {title:'見積りの郵送依頼', build:x=>({
+    call:[`「御社の製品を購入したいと考えているのですが、製品を${x.q3}個注文した場合の見積りを郵送していただきたいとお伝え願えますか」`],
+    rep:[`当社の製品を${x.q3}個ご注文いただいた場合の見積書をお送りするということでよろしいでしょうか`]})},
+  {title:'明日までに連絡がほしい', build:x=>({
+    call:[`「来週の打合せの件で事前に話しておきたいことがあるので、${x.n}${x.ext}から明日の${x.t1}までにご連絡いただけるようお伝え願えますか」`],
+    rep:[`来週の打合せの件で、${x.n}より明日の${x.t1}までにご連絡差し上げるということでよろしいでしょうか`]})},
+  {title:'創立記念パーティーのお礼', build:x=>({
+    call:[`「先日の創立記念パーティーにご来場いただいたお礼で御社に伺いたいので、${x.n}${x.ext}に明日のご都合のよい時間帯をお教えいただきたいとお伝え願えますか」`],
+    rep:[`先日の創立記念パーティーの件で、当社にお越しいただけるということでございますね。${x.n}より明日の都合の良い時間帯をご連絡差し上げるということでよろしいでしょうか`]})},
+  {title:'在庫の用意に一週間', build:x=>({
+    call:['「当社製品Aの在庫確認のご連絡をいただいたのですが、必要数を用意するには一週間程度かかってしまうとお伝え願えますか」'],
+    rep:['御社製品Aの在庫を必要数ご用意なさるには、一週間程度かかるということでよろしいでしょうか']})},
+  {title:'新製品発表会に参加', build:x=>({
+    call:[`「この度は新製品発表会の招待状をお送りいただきましてありがとうございます。当社からは${x.ppl}名参加いたしますとお伝え願えますか」`],
+    rep:[`当社の新製品発表会に${x.ppl}名様でご来場くださるということでよろしいでしょうか`]})},
+  {title:'会議資料を送付した', build:x=>({
+    call:[`「来週の会議資料の作成をご依頼いただいているのですが、本日${x.n}様宛てにお送りいたしましたとお伝え願えますか」`],
+    rep:['来週の会議資料を、本日お送りくださったということでよろしいでしょうか']})}
+];
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬';
+
+/* ================= 状態 ================= */
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const v = s => `<span class="v">${s}</span>`;
+const u = s => `<span class="u">${s}</span>`;
+
+const MODE = 'student';            // 'teacher' にすると教員用（伝言の制限・採点）
+const TEACHER = MODE === 'teacher';
+const ENABLE_KEY = 'denwa_enabled_msgs';
+let enabled = MESSAGES.map((_, i) => i);
+if (TEACHER){
+  try { const e = JSON.parse(localStorage.getItem(ENABLE_KEY)); if (Array.isArray(e) && e.length) enabled = e.filter(i => i >= 0 && i < MESSAGES.length); } catch(e){}
+}
+function saveEnabled(){ try { localStorage.setItem(ENABLE_KEY, JSON.stringify(enabled)); } catch(e){} }
+let marks = {};
+function resetMarks(){ marks = {}; }
+
+let state = {sheet:SHEETS[0], round:'1', len:'s', person:null, caller:null, msgSel:'random', msgIdx:0, vals:null};
+
+function newCaller(){ state.caller = {co:makeCompany(state.len), name:pick(SURNAMES), ...makeTel()}; }
+function newVals(){
+  const sh = state.sheet, a = makeDay(sh), b = makeDay(sh, a.d);
+  let t1 = makeTime(), t2 = makeTime(); while (t2 === t1) t2 = makeTime();
+  const qty = () => rint(2, 60) * 5;
+  const q1 = qty(); let q2 = qty(); while (q2 === q1) q2 = qty();
+  state.vals = {d1:a.text, d2:b.text, t1, t2, tel2:makeTel().tel, mob:makeMobile(), q1, q2, q3:qty(), ppl:rint(2, 9)};
+}
+function newMessage(){
+  if (state.msgSel !== 'random' && !enabled.includes(Number(state.msgSel))) state.msgSel = 'random';
+  state.msgIdx = state.msgSel === 'random' ? pick(enabled) : Number(state.msgSel);
+  newVals(); resetMarks();
+}
+
+/* ================= 組織図 ================= */
+function pbtn(p, extra=''){
+  return `<button type="button" class="pbtn ${extra}" data-id="${p.id}" aria-pressed="${state.person===p}">
+    <span class="nm">${p.name}${p.title || 'さん'}</span><span class="st">${p.short}</span></button>`;
+}
+function renderOrg(){
+  const sh = state.sheet, n = sh.branches.length;
+  const top = sh.people.find(p => p.dept === sh.top.dept);
+  const org = document.getElementById('org');
+  org.style.setProperty('--n', n);
+  org.innerHTML = `
+    ${top ? pbtn(top,'top') : ''}
+    <div class="trunk"></div>
+    <div class="branches">
+      ${sh.branches.map(b => `<div class="branch"><div class="ka">${b}</div>
+        ${sh.people.filter(p=>p.dept===b).map(p=>pbtn(p)).join('')}
+        ${b === sh.myDept ? '<div class="self">あなた<br>在席中</div>' : ''}</div>`).join('')}
+    </div>`;
+  org.querySelectorAll('.pbtn').forEach(b=>b.addEventListener('click',()=>selectPerson(b.dataset.id)));
+}
+function selectPerson(id){
+  state.person = state.sheet.people.find(p=>p.id===id);
+  newCaller(); newMessage();
+  renderOrg(); render();
+  if (window.matchMedia('(max-width:860px)').matches) document.getElementById('main').scrollIntoView({behavior:'smooth'});
+}
+
+/* ================= セリフ生成 ================= */
+function statusLines(p, who){
+  const m = p.pattern;
+  const back = u(`${who}が戻りましたらお電話を差し上げるよう確かに申し伝えます`);
+  if (m === '1') return [u(`ただ今外出いたしております。${v(p.time)}時には戻る予定でございます`),
+    u('戻り次第こちらから、お電話を差し上げましょうか'), back];
+  if (m === '2' || m === '3'){
+    const kind = m === '2' ? '休暇中' : '出張中';
+    return [u(`${kind}でございます。${v(p.day)}日には出勤の予定でございます`),
+      u(`${v(p.day)}日にこちらから、お電話を差し上げましょうか`),
+      u(`${v(p.day)}日に${who}からお電話を差し上げるよう確かに申し伝えます`)];
+  }
+  if (m === '4') return [u('ただ今席を外しております') + (p.time ? u(`。${v(p.time)}時には戻る予定でございます`) : ''),
+    u('戻り次第こちらから、お電話を差し上げましょうか'), back];
+  return [u('ただ今他の電話に出ております'),
+    u('電話が終わり次第こちらから、お電話を差し上げましょうか'),
+    u(`電話が終わり次第${who}からお電話を差し上げるよう確かに申し伝えます`)];
+}
+
+function buildScript(p){
+  const sh = state.sheet;
+  const coIn = document.getElementById('stuCo').value.trim();
+  const nmIn = document.getElementById('stuName').value.trim();
+  const co = v(coIn ? esc(coIn) : '【内定先企業名】');
+  const me = v(nmIn ? esc(nmIn) : '【自分の名前】');
+  const c = state.caller;
+  const cc = v(c.co), cn = v(c.name), tel = v(c.tel);
+  const who = v(p.name), dept = v(p.dept);
+  const myself = (p.dept === sh.myDept ? u('同じ') : '') + sh.myDept;
+  const R = (t, o={}) => ({s:'r', t, ...o}), C = (t, o={}) => ({s:'c', t, ...o});
+  const [absent, offer, promise] = statusLines(p, who);
+
+  const head = [
+    R(`「はい、${co}でございます」`),
+    C(`「私、${cc}の${cn}と申します。いつもお世話になっております」`),
+    R('「いつも（こちらこそ）お世話になっております」'),
+    C(`「恐れ入りますが、${dept}の${who}様いらっしゃいますでしょうか」`),
+    R(`「${dept}の${who}でございますね。かしこまりました。少々お待ちくださいませ」`)
+  ];
+  const opening = [
+    R('「お待たせいたしました」'),
+    R(`「申し訳ございません。あいにくではございますが、${who}は、${absent}」`),
+    R(`「お差し支えなければ、${offer}」`)
+  ];
+
+  if (state.round === '1'){
+    return {head, body:[...opening,
+      C('「それでは、申し訳ございませんがよろしくお願いいたします」'),
+      R('「かしこまりました。恐れ入りますが、念のためお電話番号をお聞かせ願えませんでしょうか」'),
+      C(`「はい、${tel}です」`),
+      R(`「かしこまりました。それでは確認させていただきます。${tel}、${cc}の${cn}様でいらっしゃいますね」`),
+      C('「はい」'),
+      R(`「私、${myself}の${me}と申します。${promise}」`),
+      C('「では、よろしくお願いいたします」'),
+      R('「失礼いたします」')
+    ]};
+  }
+
+  const x = state.vals;
+  const msg = MESSAGES[state.msgIdx].build({
+    d1:v(x.d1), d2:v(x.d2), t1:v(x.t1), t2:v(x.t2), tel2:v(x.tel2), mob:v(x.mob),
+    q1:v(x.q1), q2:v(x.q2), q3:v(x.q3), ppl:v(x.ppl), n:who, ext:v(p.ext)
+  });
+  const reps = msg.rep.map((r, i) => i === 0
+    ? R(`「かしこまりました。それでは確認させていただきます。${u(r)}」`, {alt:'復唱例'})
+    : R(`「${u(r)}」`, {alt:'または'}));
+  return {head, body:[...opening,
+    C('「それでは、申し訳ございませんが伝言をお願いできますか」'),
+    R('「かしこまりました。お願いいたします」'),
+    ...msg.call.map(t => C(t, {msg:true})),
+    ...reps,
+    C('「はい、結構です」'),
+    R(`「${cc}の${cn}様でいらっしゃいますね」`),
+    C('「はい」'),
+    R(`「私、${myself}の${me}と申します。${u(`確かに${who}へ申し伝えます`)}」`),
+    C('「では、よろしくお願いいたします」'),
+    R('「失礼いたします」')
+  ]};
+}
+
+const MARKS = [['o','○'],['t','△'],['x','×']];
+function markCell(i){
+  if (!TEACHER) return '';
+  if (i == null) return '<div class="cell cm"></div>';
+  return `<div class="cell cm"><div class="marks" role="group" aria-label="採点">${MARKS.map(([k,s]) =>
+    `<button type="button" class="mk mk-${k}" data-i="${i}" data-k="${k}" aria-pressed="${marks[i]===k}" aria-label="${s}">${s}</button>`).join('')}</div></div>`;
+}
+let recvCount = 0;
+function rowHTML(l){
+  const alt = l.alt ? `<span class="alt">${l.alt}</span>` : '';
+  if (l.s === 'r'){
+    const i = recvCount++;
+    return `<div class="row recv ${marks[i] ? 'm-' + marks[i] : ''}" data-row="${i}"><div class="cell c1"><span class="tag">受ける側</span>${alt}${l.t}</div>${markCell(i)}<div class="cell c2"></div></div>`;
+  }
+  return `<div class="row call ${l.msg?'msg':''}"><div class="cell c1"></div>${markCell(null)}<div class="cell c2"><span class="tag">かける側</span>${l.t}</div></div>`;
+}
+function tally(){
+  const total = document.querySelectorAll('.row.recv').length;
+  const n = k => Object.values(marks).filter(x => x === k).length;
+  const el = document.getElementById('tally');
+  if (el) el.innerHTML = `<span class="tk o">○ ${n('o')}</span><span class="tk t">△ ${n('t')}</span><span class="tk x">× ${n('x')}</span><span class="tk">未採点 ${total - Object.keys(marks).length}</span>`;
+}
+
+/* ================= 描画 ================= */
+const EMPTY = '<div class="panel empty">左の組織図から、電話で呼び出す人を選んでください。</div>';
+function render(){
+  const p = state.person, main = document.getElementById('main');
+  if (!p){ main.innerHTML = EMPTY; return; }
+  const c = state.caller, r2 = state.round === '2';
+  const sc = buildScript(p);
+  const label = p.name + (p.title || 'さん');
+
+  const checks = [...p.checks];
+  if (r2){
+    checks.push('伝言の内容（日時・数字・番号）を正しく復唱できているか');
+    checks.push('相手の会社名と名前を確認できているか');
+  } else {
+    checks.push('電話番号・会社名・名前を正しく復唱できているか');
+  }
+  checks.push(`社外に対して「${label}」と呼ばず、「${p.name}」と言えているか`);
+  if (p.dept === state.sheet.myDept) checks.push(`同じ課なので「同じ${state.sheet.myDept}の〜」と名乗れているか`);
+
+  const opts = ['<option value="random">ランダム</option>']
+    .concat(enabled.slice().sort((a,b)=>a-b).map(i=>`<option value="${i}">${CIRCLED[i]} ${MESSAGES[i].title}</option>`)).join('');
+  recvCount = 0;
+  const headRows = sc.head.map(rowHTML).join(''), bodyRows = sc.body.map(rowHTML).join('');
+
+  main.innerHTML = `
+    <section class="callcard" aria-label="かける側の情報">
+      <dl>
+        <div><dt>かける側の会社名</dt><dd>${c.co}</dd></div>
+        <div><dt>かける側の名前</dt><dd>${c.name}</dd></div>
+        ${r2 ? '' : `<div><dt>電話番号</dt><dd>${c.tel}<small>${c.city}</small></dd></div>`}
+      </dl>
+      <button class="btn" id="reroll" type="button">会社名と名前を変える</button>
+    </section>
+
+    <section class="panel status">
+      <div class="head">
+        <h2 class="who">${p.dept}　${label}</h2>
+        <span class="badge">${PATTERN_NAME[p.pattern]}</span>
+        ${r2 ? `<span class="badge msg">伝言${CIRCLED[state.msgIdx]}　${MESSAGES[state.msgIdx].title}</span>` : ''}
+      </div>
+      <p class="sit">状況：${p.status}</p>
+      ${r2 ? `<div class="msgbar">
+        <select id="msgSel" aria-label="伝言の内容">${opts}</select>
+        <button class="btn" id="msgNext" type="button">別の伝言にする</button>
+      </div>` : ''}
+      <ul class="checks">${checks.map(x=>`<li>${x}</li>`).join('')}</ul>
+    </section>
+
+    <div class="legend"><span><span class="u">赤い下線</span>…状況によって変わる大事な部分</span><span>色の濃い列…かける側のセリフ</span></div>
+
+    ${TEACHER ? `<div class="tallybar"><div id="tally" class="tally"></div><button class="btn" id="markReset" type="button">採点をリセット</button></div>` : ''}
+
+    <section class="script ${TEACHER ? 't' : ''}" aria-label="セリフ">
+      <div class="cols"><div>受ける側</div>${TEACHER ? '<div>採点</div>' : ''}<div>かける側</div></div>
+      ${headRows}
+      <div class="hold">保留</div>
+      ${bodyRows}
+    </section>`;
+
+  if (TEACHER){
+    tally();
+    document.getElementById('markReset').addEventListener('click',()=>{resetMarks(); render();});
+    main.querySelectorAll('.mk').forEach(b=>b.addEventListener('click',()=>{
+      const i = b.dataset.i, k = b.dataset.k;
+      if (marks[i] === k) delete marks[i]; else marks[i] = k;
+      const row = main.querySelector(`.row[data-row="${i}"]`);
+      row.classList.remove('m-o','m-t','m-x'); if (marks[i]) row.classList.add('m-' + marks[i]);
+      row.querySelectorAll('.mk').forEach(x=>x.setAttribute('aria-pressed', marks[i] === x.dataset.k));
+      tally();
+    }));
+  }
+
+  document.getElementById('reroll').addEventListener('click',()=>{newCaller();render();});
+  if (r2){
+    const sel = document.getElementById('msgSel');
+    sel.value = state.msgSel;
+    sel.addEventListener('change',()=>{state.msgSel = sel.value; newMessage(); render();});
+    document.getElementById('msgNext').addEventListener('click',()=>{
+      if (state.msgSel === 'random' && enabled.length > 1){
+        let i; do { i = pick(enabled); } while (i === state.msgIdx);
+        state.msgIdx = i;
+      }
+      newVals(); resetMarks(); render();
+    });
+  }
+}
+
+function bindSeg(id, attr, key, after){
+  const seg = document.getElementById(id);
+  seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    state[key] = b.dataset[attr];
+    seg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b));
+    after();
+  }));
+}
+bindSeg('roundSeg','r','round',()=>{resetMarks(); render();});
+bindSeg('lenSeg','l','len',()=>{ if (state.person){ newCaller(); render(); } });
+
+const sheetSel = document.getElementById('sheetSel');
+sheetSel.innerHTML = SHEETS.map(s=>`<option value="${s.id}">${s.label}</option>`).join('');
+sheetSel.addEventListener('change',()=>{
+  state.sheet = SHEETS.find(s=>s.id===sheetSel.value);
+  state.person = null; renderOrg(); render();
+});
+
+document.getElementById('randPerson').addEventListener('click',()=>{
+  const others = state.sheet.people.filter(p=>p!==state.person);
+  selectPerson(pick(others).id);
+});
+['stuCo','stuName'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+
+if (TEACHER){
+  document.title = '電話応対 実技（教員用）';
+  document.querySelector('header.top h1').textContent = '電話応対 実技（教員用）';
+  const sec = document.createElement('section');
+  sec.className = 'panel';
+  sec.innerHTML = `<h2>出題する伝言（2回目）</h2>
+    <div class="mfilter" id="mfilter">${MESSAGES.map((m,i)=>`<label class="mf"><input type="checkbox" value="${i}"><span>${CIRCLED[i]} ${m.title}</span></label>`).join('')}</div>
+    <div class="mfbtns"><button class="btn" type="button" id="mfAll">すべて選ぶ</button></div>
+    <p class="hint">チェックを外した伝言はランダムで出なくなります（最低1つは残ります）。設定はこのブラウザに保存されます。</p>`;
+  const roundPanel = document.getElementById('roundSeg').closest('.panel');
+  roundPanel.after(sec);
+  const boxes = [...sec.querySelectorAll('input')];
+  const sync = () => boxes.forEach(b => b.checked = enabled.includes(Number(b.value)));
+  const changed = () => {
+    saveEnabled();
+    if (state.person && state.round === '2' && !enabled.includes(state.msgIdx)) newMessage();
+    render();
+  };
+  boxes.forEach(b => b.addEventListener('change', () => {
+    const i = Number(b.value);
+    if (b.checked){ if (!enabled.includes(i)) enabled.push(i); }
+    else if (enabled.length > 1) enabled = enabled.filter(x => x !== i);
+    else b.checked = true;
+    changed();
+  }));
+  document.getElementById('mfAll').addEventListener('click', () => { enabled = MESSAGES.map((_, i) => i); sync(); changed(); });
+  sync();
+}
+renderOrg();
+</script>
+</body>
+</html>
