@@ -76,6 +76,9 @@ header.top h1{margin:0;font-size:clamp(1.3rem,2.6vw,1.75rem);font-weight:900;let
 .pbtn .nm{font-weight:700}
 .pbtn .st{font-size:.7rem;color:var(--ink-soft)}
 .pbtn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.pbtn.used{opacity:.45;cursor:not-allowed;border-style:dashed}
+.pbtn.used:hover{border-color:var(--rule)}
+.status .head .btn{margin-left:auto}
 .pbtn[aria-pressed="true"] .st{color:var(--sheet);opacity:.85}
 .pbtn.top{max-width:160px;align-items:center;text-align:center}
 .self{border:1.5px dashed var(--rule);border-radius:5px;padding:5px 7px;font-size:.85rem;color:var(--ink-soft);line-height:1.35}
@@ -244,7 +247,7 @@ button,label.mf,select{-webkit-tap-highlight-color:transparent;touch-action:mani
    ※同姓の人（女性の中田さん）と在席の人は選択肢から除外
    ========================================================= */
 const SHEETS = [
-  {id:'s1', label:'状況設定シート①（1月17日・月）', today:17, wd:1, last:31, myDept:'販売二課',
+  {id:'s1', label:'状況設定シート①', today:17, wd:1, last:31, myDept:'販売二課',
    top:{dept:'販売部'}, branches:['販売一課','販売二課','販売三課'],
    people:[
     {id:'yamanaka', name:'山中', title:'部長', ext:'部長', dept:'販売部', short:'出張（19日出社）', pattern:'3', day:'19',
@@ -290,7 +293,7 @@ const SHEETS = [
      status:'トイレに行っている',
      checks:['トイレとは言わず「席を外しております」と伝えているか']}
    ]},
-  {id:'s2', label:'状況設定シート②（1月17日・月）', today:17, wd:1, last:31, myDept:'販売二課',
+  {id:'s2', label:'状況設定シート②', today:17, wd:1, last:31, myDept:'販売二課',
    top:{dept:'販売部'}, branches:['販売一課','販売二課','販売三課'],
    people:[
     {id:'yamanaka', name:'山中', title:'部長', ext:'部長', dept:'販売部', short:'休暇（24日出社）', pattern:'2', day:'24',
@@ -336,7 +339,7 @@ const SHEETS = [
      status:'新製品開発による、取り扱い説明を受けるため本社に外出中。17時帰社予定',
      checks:['戻りの時刻を「17時」と伝えているか']}
    ]},
-  {id:'s0', label:'総務部シート（11月12日・水）', today:12, wd:3, last:30, myDept:'総務課',
+  {id:'s0', label:'テキスト', today:12, wd:3, last:30, myDept:'総務課',
    top:{dept:'総務部'}, branches:['庶務課','総務課'],
    people:[
     {id:'yamanaka', name:'山中', title:'部長', ext:'部長', dept:'総務部', short:'打合せ中', pattern:'4',
@@ -511,9 +514,26 @@ function newMessage(){
 }
 
 /* ================= 組織図 ================= */
+/* 教員用：1回目・2回目の状態を別々に持ち、名指し人が重ならないようにする */
+let rounds = {}, curRound = '1';
+const otherRound = r => r === '1' ? '2' : '1';
+const excludedPerson = () => TEACHER ? (rounds[otherRound(state.round)] || {}).person || null : null;
+function saveRound(r){ rounds[r] = {person:state.person, caller:state.caller, msgIdx:state.msgIdx, vals:state.vals, marks}; }
+function loadRound(r){
+  const o = rounds[r] || {};
+  state.person = o.person || null; state.caller = o.caller || null;
+  if (o.vals){ state.msgIdx = o.msgIdx; state.vals = o.vals; }
+  marks = o.marks || {};
+}
+function pickPerson(){
+  const ex = excludedPerson();
+  const cand = state.sheet.people.filter(p => p !== state.person && p !== ex);
+  if (cand.length) selectPerson(pick(cand).id);
+}
 function pbtn(p, extra=''){
-  return `<button type="button" class="pbtn ${extra}" data-id="${p.id}" aria-pressed="${state.person===p}">
-    <span class="nm">${p.name}${p.title || 'さん'}</span><span class="st">${p.short}</span></button>`;
+  const used = excludedPerson() === p;
+  return `<button type="button" class="pbtn ${extra} ${used ? 'used' : ''}" data-id="${p.id}" aria-pressed="${state.person===p}" ${used ? 'disabled' : ''}>
+    <span class="nm">${p.name}${p.title || 'さん'}</span><span class="st">${used ? otherRound(state.round) + '回目で使用' : p.short}</span></button>`;
 }
 function renderOrg(){
   const sh = state.sheet, n = sh.branches.length;
@@ -531,7 +551,9 @@ function renderOrg(){
   org.querySelectorAll('.pbtn').forEach(b=>b.addEventListener('click',()=>selectPerson(b.dataset.id)));
 }
 function selectPerson(id){
-  state.person = state.sheet.people.find(p=>p.id===id);
+  const p = state.sheet.people.find(p=>p.id===id);
+  if (!p || p === excludedPerson()) return;
+  state.person = p;
   newCaller(); newMessage();
   renderOrg(); render();
   if (window.matchMedia('(max-width:860px)').matches) document.getElementById('main').scrollIntoView({behavior:'smooth'});
@@ -677,6 +699,7 @@ function render(){
     <section class="panel status">
       <div class="head">
         <h2 class="who">${p.dept}　${label}</h2>
+        ${TEACHER ? '<button class="btn" id="personNext" type="button">名指し人を変える</button>' : ''}
         <span class="badge">${PATTERN_NAME[p.pattern]}</span>
         ${r2 ? `<span class="badge msg">伝言${CIRCLED[state.msgIdx]}　${MESSAGES[state.msgIdx].title}</span>` : ''}
       </div>
@@ -700,6 +723,7 @@ function render(){
     </section>`;
 
   if (TEACHER){
+    document.getElementById('personNext').addEventListener('click', pickPerson);
     tally();
     document.getElementById('markReset').addEventListener('click',()=>{resetMarks(); render();});
     main.querySelectorAll('.mk').forEach(b=>b.addEventListener('click',()=>{
@@ -735,20 +759,22 @@ function bindSeg(id, attr, key, after){
     after();
   }));
 }
-bindSeg('roundSeg','r','round',()=>{resetMarks(); render();});
+bindSeg('roundSeg','r','round',()=>{
+  if (!TEACHER){ resetMarks(); render(); return; }
+  saveRound(curRound); curRound = state.round; loadRound(curRound);
+  renderOrg(); render();
+  if (!state.person && excludedPerson()) pickPerson();   // 2回目は自動で別の人を選ぶ
+});
 bindSeg('lenSeg','l','len',()=>{ if (state.person){ newCaller(); render(); } });
 
 const sheetSel = document.getElementById('sheetSel');
 sheetSel.innerHTML = SHEETS.map(s=>`<option value="${s.id}">${s.label}</option>`).join('');
 sheetSel.addEventListener('change',()=>{
   state.sheet = SHEETS.find(s=>s.id===sheetSel.value);
-  state.person = null; renderOrg(); render();
+  state.person = null; rounds = {}; resetMarks(); renderOrg(); render();
 });
 
-document.getElementById('randPerson').addEventListener('click',()=>{
-  const others = state.sheet.people.filter(p=>p!==state.person);
-  selectPerson(pick(others).id);
-});
+document.getElementById('randPerson').addEventListener('click', pickPerson);
 ['stuCo','stuName'].forEach(id=>document.getElementById(id).addEventListener('input',render));
 
 if (TEACHER){
@@ -761,6 +787,17 @@ if (TEACHER){
     <div class="mfbtns"><button class="btn" type="button" id="mfAll">すべて選ぶ</button></div>
     <p class="hint">チェックを外した伝言はランダムで出なくなります（最低1つは残ります）。設定はこのブラウザに保存されます。</p>`;
   const roundPanel = document.getElementById('roundSeg').closest('.panel');
+  const nx = document.createElement('div');
+  nx.innerHTML = `<button class="rand" id="nextStudent" type="button">次の学生へ（1回目・2回目をリセット）</button>
+    <p class="hint">1回目と2回目の名指し人・採点は別々に記録され、同じ人は選べません。</p>`;
+  roundPanel.append(nx);
+  nx.querySelector('#nextStudent').addEventListener('click', () => {
+    rounds = {}; state.person = null; state.caller = null; resetMarks();
+    curRound = state.round = '1';
+    document.querySelectorAll('#roundSeg button').forEach(x => x.setAttribute('aria-pressed', x.dataset.r === '1'));
+    document.getElementById('stuName').value = '';
+    renderOrg(); render();
+  });
   roundPanel.after(sec);
   const boxes = [...sec.querySelectorAll('input')];
   const sync = () => boxes.forEach(b => b.checked = enabled.includes(Number(b.value)));
