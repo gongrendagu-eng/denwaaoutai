@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="電話テスト">
+<title>電話応対 実技テスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F7FA; --sheet:#FFFFFF; --ink:#1E3350; --ink-soft:#4E6280;
+  --rule:#CBD3DE; --tint:#E7EEF7; --red:#C2332B; --red-soft:#FBE9E7;
+  --ok:#2F6F57; --ok-soft:#E4F1EB; --amber:#8A5A00; --amber-soft:#FFF3D6;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121A26; --sheet:#1A2433; --ink:#E3EAF4; --ink-soft:#9FB0C6;
+    --rule:#33425A; --tint:#22314A; --red:#FF7A6E; --red-soft:#3A2224;
+    --ok:#7FD1AE; --ok-soft:#1D3329; --amber:#F2C46B; --amber-soft:#3A2F17;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121A26; --sheet:#1A2433; --ink:#E3EAF4; --ink-soft:#9FB0C6;
+  --rule:#33425A; --tint:#22314A; --red:#FF7A6E; --red-soft:#3A2224;
+  --ok:#7FD1AE; --ok-soft:#1D3329; --amber:#F2C46B; --amber-soft:#3A2F17;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"BIZ UDPGothic","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  font-size:16px;line-height:1.7}
+h1,h2,h3{font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header.top{border-bottom:3px solid var(--ink);padding-bottom:10px;margin-bottom:18px}
+header.top h1{margin:0;font-size:clamp(1.3rem,2.6vw,1.75rem);font-weight:900;letter-spacing:.04em}
+
+.layout{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:14px}
+.panel h2{font-size:1rem;margin:0 0 10px;font-weight:700}
+.side{display:flex;flex-direction:column;gap:16px;position:sticky;top:12px}
+@media (max-width:860px){.side{position:static}}
+
+/* segmented controls */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg button{cursor:pointer;border:0;background:var(--sheet);padding:8px 6px;font-weight:700;line-height:1.3}
+.seg button + button{border-left:1.5px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.seg.round button{padding:12px 6px;font-size:1.05rem}
+.seg.round small{display:block;font-weight:400;font-size:.78rem;opacity:.85}
+
+/* org chart picker */
+.org{display:flex;flex-direction:column;align-items:center}
+.org .trunk{width:2px;height:14px;background:var(--rule)}
+.org .branches{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:6px;width:100%;position:relative;padding-top:14px}
+.org .branches::before{content:"";position:absolute;top:0;left:calc(50% / var(--n,2));right:calc(50% / var(--n,2));height:2px;background:var(--rule)}
+.sheetsel{width:100%;padding:8px;border:1.5px solid var(--ink);border-radius:5px;background:var(--sheet);font-weight:700}
+.org .branch{display:flex;flex-direction:column;gap:6px;position:relative}
+.org .branch::before{content:"";position:absolute;top:-14px;left:50%;width:2px;height:14px;background:var(--rule)}
+.org .ka{text-align:center;font-weight:700;font-size:.85rem;color:var(--ink-soft);margin-bottom:2px}
+.pbtn{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;cursor:pointer;
+  background:var(--sheet);border:1.5px solid var(--rule);border-radius:5px;padding:5px 7px;line-height:1.3}
+.pbtn .nm{font-size:.92rem}
+.pbtn:hover{border-color:var(--ink-soft)}
+.pbtn .nm{font-weight:700}
+.pbtn .st{font-size:.7rem;color:var(--ink-soft)}
+.pbtn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.pbtn.used{opacity:.45;cursor:not-allowed;border-style:dashed}
+.pbtn.used:hover{border-color:var(--rule)}
+.status .head .btn{margin-left:auto}
+.pbtn[aria-pressed="true"] .st{color:var(--sheet);opacity:.85}
+.pbtn.top{max-width:160px;align-items:center;text-align:center}
+.self{border:1.5px dashed var(--rule);border-radius:5px;padding:5px 7px;font-size:.85rem;color:var(--ink-soft);line-height:1.35}
+.rand{margin-top:12px;width:100%;cursor:pointer;background:transparent;border:1.5px solid var(--ink);border-radius:5px;padding:8px;font-weight:700}
+.rand:hover{background:var(--tint)}
+
+.fl{display:block;font-size:.85rem;color:var(--ink-soft);margin:0 0 4px}
+label.f{display:block;font-size:.85rem;color:var(--ink-soft);margin-bottom:8px}
+label.f input{display:block;width:100%;margin-top:3px;padding:7px 9px;border:1.5px solid var(--rule);border-radius:5px;background:var(--paper)}
+.hint{font-size:.78rem;color:var(--ink-soft);margin:6px 0 0}
+
+/* main */
+.main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.callcard{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center;
+  background:var(--tint);border:1px solid var(--rule);border-radius:6px;padding:12px 16px}
+.callcard dl{margin:0;display:flex;flex-wrap:wrap;gap:4px 28px}
+.callcard dt{font-size:.75rem;color:var(--ink-soft)}
+.callcard dd{margin:0;font-weight:700;font-size:1.15rem}
+.callcard dd small{font-weight:400;font-size:.8rem;color:var(--ink-soft);margin-left:6px}
+.btn{cursor:pointer;background:var(--sheet);border:1.5px solid var(--ink);border-radius:5px;padding:7px 12px;font-weight:700;white-space:nowrap}
+.btn:hover{background:var(--paper)}
+@media (max-width:520px){.callcard{grid-template-columns:1fr}}
+
+.status{display:grid;gap:10px}
+.status .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px}
+.status .who{font-size:1.4rem;font-weight:900;margin:0 6px 0 0}
+.badge{display:inline-block;font-weight:700;font-size:.88rem;padding:2px 10px;border-radius:4px;
+  background:var(--red-soft);color:var(--red);border:1px solid currentColor}
+.badge.msg{background:var(--ok-soft);color:var(--ok)}
+.status .sit{margin:0}
+.msgbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.msgbar select{padding:6px 8px;border:1.5px solid var(--ink);border-radius:5px;background:var(--sheet);max-width:100%}
+.checks{margin:0;padding:10px 12px 10px 30px;background:var(--amber-soft);border-radius:5px;font-size:.92rem}
+.checks li::marker{color:var(--amber)}
+
+/* script */
+.script{background:var(--sheet);border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.script .cols{display:grid;grid-template-columns:1fr 1fr;background:var(--ink);color:var(--sheet);font-weight:700;text-align:center}
+.script .cols div{padding:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--rule)}
+.row .cell{padding:10px 14px}
+.row .cell + .cell{border-left:1px solid var(--rule)}
+.row.call .c2{background:var(--tint);font-weight:700;font-size:1.05rem}
+.row.call.msg .c2{border-left:4px solid var(--ok)}
+.row .tag{display:none}
+.row .alt{display:block;font-size:.78rem;color:var(--ink-soft);font-weight:700}
+.hold{border-top:2px solid var(--ink);background:var(--paper);text-align:center;font-size:.85rem;color:var(--ink-soft);padding:5px}
+.v{background:linear-gradient(transparent 62%, var(--tint) 62%);padding:0 1px}
+.row.call .c2 .v{background:none;text-decoration:underline dotted;text-underline-offset:3px}
+.u{text-decoration:underline 2px var(--red);text-underline-offset:4px;color:var(--red);font-weight:700}
+.u .v{background:none}
+.legend{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:.8rem;color:var(--ink-soft);margin-top:-6px}
+
+@media (max-width:620px){
+  .script .cols{display:none}
+  .row{grid-template-columns:1fr}
+  .row .cell:empty{display:none}
+  .row .cell + .cell{border-left:0}
+  .row .tag{display:block;font-size:.72rem;font-weight:700;color:var(--ink-soft);margin-bottom:2px}
+  .row.call .c2{border-left:4px solid var(--ink)}
+}
+.empty{padding:40px 20px;text-align:center;color:var(--ink-soft)}
+/* 教員用：伝言の制限 */
+.mfilter{display:grid;grid-template-columns:1fr;gap:2px}
+.mf{display:flex;gap:8px;align-items:center;font-size:.88rem;padding:3px 4px;border-radius:4px;cursor:pointer}
+.mf:hover{background:var(--tint)}
+.mf input{width:18px;height:18px;accent-color:var(--ink);flex:none}
+.mfbtns{margin-top:8px}
+/* 教員用：採点 */
+.script.t .cols,.script.t .row{grid-template-columns:1fr 112px 1fr}
+.script.t .row .cell.cm{padding:8px 6px;display:flex;align-items:flex-start;justify-content:center}
+.marks{display:flex;gap:4px}
+.mk{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--rule);background:var(--sheet);cursor:pointer;
+  font-weight:700;font-size:1rem;line-height:1;padding:0;color:var(--ink-soft)}
+.mk:hover{border-color:var(--ink-soft)}
+.mk-o[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--sheet)}
+.mk-t[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:var(--sheet)}
+.mk-x[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:var(--sheet)}
+.row.recv.m-o .c1{box-shadow:inset 4px 0 0 var(--ok)}
+.row.recv.m-t .c1{box-shadow:inset 4px 0 0 var(--amber)}
+.row.recv.m-x .c1{box-shadow:inset 4px 0 0 var(--red)}
+.tallybar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--sheet);border:1.5px solid var(--ink);border-radius:6px;padding:8px 12px}
+.tally{display:flex;flex-wrap:wrap;gap:6px 16px;font-weight:700;font-size:1.05rem}
+.tk.o{color:var(--ok)} .tk.t{color:var(--amber)} .tk.x{color:var(--red)}
+.tk:last-child{color:var(--ink-soft);font-weight:400;font-size:.9rem;align-self:center}
+@media (max-width:620px){
+  .script.t .row{grid-template-columns:1fr}
+  .script.t .row .cell.cm:empty,.script.t .row.call .cell.cm{display:none}
+  .script.t .row .cell.cm{justify-content:flex-start;padding:0 14px 10px}
+}
+
+/* iPad などタッチ操作向け */
+html{-webkit-text-size-adjust:100%}
+button,label.mf,select{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media (pointer:coarse){
+  .pbtn{padding:8px 8px;min-height:48px}
+  .seg button{min-height:46px}
+  .btn,.rand,.sheetsel,.msgbar select{min-height:44px}
+  label.f input{min-height:44px;font-size:16px}
+  .mf{padding:8px 6px}
+  .mf input{width:22px;height:22px}
+  .mk{width:44px;height:44px;font-size:1.15rem}
+  .script.t .cols,.script.t .row{grid-template-columns:1fr 156px 1fr}
+  .marks{gap:6px}
+}
+@media (pointer:coarse) and (max-width:620px){
+  .script.t .row{grid-template-columns:1fr}
+}
+</style>
+
+<style>
+.nogrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.nobtn{cursor:pointer;border:1.5px solid var(--rule);background:var(--sheet);border-radius:5px;padding:6px 4px;line-height:1.25;text-align:center}
+.nobtn b{display:block;font-size:1rem}
+.nobtn small{font-size:.72rem;color:var(--ink-soft)}
+.nobtn[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.nobtn[aria-current="true"] small{color:var(--sheet)}
+.nobtn.done{border-color:var(--ok);box-shadow:inset 0 -3px 0 var(--ok)}
+.nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.nav .now{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:900;font-size:1.5rem;margin:0}
+.nav .now small{font-size:.95rem;font-weight:700;color:var(--ink-soft);margin-left:8px}
+.nav .sp{flex:1}
+.memo{margin:0;font-size:.88rem;color:var(--ink-soft);border-left:3px solid var(--rule);padding:2px 0 2px 10px}
+@media (pointer:coarse){.nobtn{min-height:52px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><h1>電話応対 実技テスト</h1></header>
+  <div class="layout">
+    <aside class="side">
+      <section class="panel">
+        <h2>順番を選ぶ</h2>
+        <div class="nogrid" id="nogrid"></div>
+      </section>
+      <section class="panel">
+        <h2>受ける側</h2>
+        <label class="f">内定先企業名<input id="stuCo" type="text" placeholder="未入力なら【内定先企業名】"></label>
+        <label class="f">自分の名前<input id="stuName" type="text" placeholder="未入力なら【自分の名前】"></label>
+        <p class="hint">次の順番に進むと名前の欄は空になります。</p>
+      </section>
+    </aside>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+<script>
+/* ===== テスト用状況設定シート（受ける側は庶務課） ===== */
+const MY_DEPT = '庶務課';
+const PEOPLE = {
+  akimoto: {name:'秋元', title:'課長', ext:'課長', dept:'総務課', pattern:'3', day:'17',
+    status:'出張中、次の出勤予定は17日。毎日、朝9時に連絡あり',
+    checks:['出勤日を「17日」と伝えているか']},
+  miyahara:{name:'宮原', title:'係長', ext:'係長', dept:'総務課', pattern:'2', day:'27',
+    status:'休暇中、次の出勤予定は27日。新婚旅行に行っている',
+    checks:['出勤日を「27日」と伝えているか','休暇の理由（新婚旅行）まで話していないか']},
+  matsuda: {name:'松田', title:'', ext:'さん', dept:'総務課', pattern:'1', time:'17',
+    status:'お取引先へ外勤中で、17時に戻る予定',
+    checks:['戻りの時刻を「17時」と伝えているか','外出先を話していないか']},
+  yamanaka:{name:'山中', title:'部長', ext:'部長', dept:'総務部', pattern:'4',
+    status:'社内にいるが、来客と打ち合わせ中',
+    checks:['来客中でも「席を外しております」と伝えているか']},
+  mori:    {name:'森', title:'係長', ext:'係長', dept:'庶務課', pattern:'4',
+    status:'社内にいるが、どこにいるか不明',
+    checks:['所在不明でも「席を外しております」と伝えているか']},
+  kaneko:  {name:'金子', title:'', ext:'さん', dept:'庶務課', pattern:'5',
+    status:'在席中だが、他の電話に出ている',
+    checks:['「他の電話に出ております」と伝えているか']}
+};
+const PATTERN_NAME = {'1':'①不在（外出）','2':'②不在（休暇）','3':'③不在（出張）',
+  '4':'④職場内にいる（席を外している）','5':'⑤職場内にいる（電話中）'};
+
+/* ===== 伝言（状況設定ファイルの内容をセリフにしたもの） ===== */
+const MESSAGES = {
+  reschedule:{title:'打合せの日程変更', build:x=>({
+    call:['「明日お約束していた打合せの日程を、来週の水曜日15時30分に変更して欲しいとお伝え願えますか」'],
+    rep:['明日の打合せのご予定を来週の水曜日の15時30分にご変更なさりたいということでよろしいでしょうか',
+         '打合せのご予定を明日から来週の水曜日の15時30分にご変更なさりたいということでよろしいでしょうか']})},
+  contact:{title:'明日14時までに連絡がほしい', build:x=>({
+    call:[`「来週の打合せの件で事前に話しておきたいことがあるので、${x.n}${x.ext}から明日の14時までにご連絡いただけるようお伝え願えますか」`],
+    rep:[`来週の打合せの件で、${x.n}より明日の14時までにご連絡差し上げるということでよろしいでしょうか`]})},
+  order:{title:'発注数の変更', build:x=>({
+    call:['「先日発注した商品の数を110個から140個に変更したいとお伝え願えますか」'],
+    rep:['先日ご注文いただいた商品の数を110個から140個にご変更なさるということでよろしいでしょうか']})},
+  successor:{title:'後任担当者の紹介', build:x=>({
+    call:[`「担当者変更のため、後任の担当者を紹介しに伺いたいので、${x.n}${x.ext}に都合の良い日を教えて欲しいとお伝え願えますか」`],
+    rep:[`新担当者のご紹介で、お越しいただけるということでございますね。${x.n}から都合の良い日をご連絡差し上げるということでよろしいでしょうか`]})},
+  docs:{title:'会議資料を送付した', build:x=>({
+    call:[`「来週の会議に使用する資料を、本日${x.n}様宛てにお送りいたしましたとお伝え願えますか」`],
+    rep:['来週の会議資料を、本日お送りくださったということでよろしいでしょうか']})}
+};
+
+/* ===== 順番ごとのデータ（状況設定_-_コピー.xlsx より） ===== */
+const ORDER = [{"no": 1, "time": "9:30", "r1": {"co": "日本ガイシ", "name": "野呂", "callee": "総務課の秋元課長", "p": "akimoto", "tel": "052-872-6151"}, "r2": {"co": "セントラルホームズ", "name": "岩田", "callee": "山中総務部長", "p": "yamanaka", "tel": "052-953-8850", "m": "reschedule", "memo": "明日約束していた打ち合わせの日程を、来週の水曜日15：30に変更してもらいたい。"}}, {"no": 2, "time": "9:38", "r1": {"co": "ダイワラクダ", "name": "北林", "callee": "総務課の宮原係長", "p": "miyahara", "tel": "0568-52-8651"}, "r2": {"co": "モルテン", "name": "中村", "callee": "庶務課の森係長", "p": "mori", "tel": "052-321-2020", "m": "contact", "memo": "来週の打ち合わせの件で事前に話をしておきたいので、明日の１４：００までに連絡してもらいたい。"}}, {"no": 3, "time": "9:46", "r1": {"co": "ニッポンフード", "name": "石川", "callee": "総務課の松田様", "p": "matsuda", "tel": "052-332-4129"}, "r2": {"co": "日本旅行", "name": "下村", "callee": "庶務課の金子様", "p": "kaneko", "tel": "052-211-5335", "m": "order", "memo": "先日発注した商品の数を１１０個から１４０個に変更したい。"}}, {"no": 4, "time": "9:54", "r1": {"co": "NTTデータ", "name": "古市", "callee": "総務課の秋元課長", "p": "akimoto", "tel": "052-204-4558"}, "r2": {"co": "トーマツ", "name": "岩田", "callee": "山中総務部長", "p": "yamanaka", "tel": "052-565-5518", "m": "successor", "memo": "担当者変更のため後任の担当者を紹介しに伺いたいので、都合のよい日を教えてほしい。"}}, {"no": 5, "time": "10:02", "r1": {"co": "十六銀行", "name": "夏目", "callee": "総務課の宮原係長", "p": "miyahara", "tel": "052-822-5896"}, "r2": {"co": "コンドーボー", "name": "玉村", "callee": "庶務課の森係長", "p": "mori", "tel": "0566-99-8011", "m": "docs", "memo": "来週の会議に使用する資料を本日、お送りいたしました。"}}, {"no": 6, "time": "10:10", "r1": {"co": "アイシン精機", "name": "中野", "callee": "総務課の松田様", "p": "matsuda", "tel": "0561-34-5912"}, "r2": {"co": "住友不動産", "name": "真野", "callee": "庶務課の金子様", "p": "kaneko", "tel": "052-569-5611", "m": "reschedule", "memo": "明日約束していた打ち合わせの日程を、来週の水曜日15：30に変更してもらいたい。"}}, {"no": 7, "time": "10:18", "r1": {"co": "名古屋銀行", "name": "金森", "callee": "総務課の秋元課長", "p": "akimoto", "tel": "052-891-4612"}, "r2": {"co": "東洋印刷", "name": "山口", "callee": "山中総務部長", "p": "yamanaka", "tel": "0568-69-8023", "m": "contact", "memo": "来週の打ち合わせの件で事前に話をしておきたいので、明日の１４：００までに連絡してもらいたい。"}}, {"no": 8, "time": "10:26", "r1": {"co": "名鉄観光", "name": "小島", "callee": "総務課の宮原係長", "p": "miyahara", "tel": "052-582-8401"}, "r2": {"co": "電通", "name": "篠原", "callee": "庶務課の森係長", "p": "mori", "tel": "052-459-0503", "m": "order", "memo": "先日発注した商品の数を１１０個から１４０個に変更したい。"}}, {"no": 9, "time": "10:34", "r1": {"co": "中部電力", "name": "佐々木", "callee": "総務課の松田様", "p": "matsuda", "tel": "052-269-1308"}, "r2": {"co": "東海広告", "name": "平松", "callee": "庶務課の金子様", "p": "kaneko", "tel": "052-565-5518", "m": "successor", "memo": "担当者変更のため後任の担当者を紹介しに伺いたいので、都合のよい日を教えてほしい。"}}, {"no": 10, "time": "10:42", "r1": {"co": "三菱重工", "name": "徳永", "callee": "総務課の秋元課長", "p": "akimoto", "tel": "0568-69-2113"}, "r2": {"co": "トヨタ自動車", "name": "山田", "callee": "山中総務部長", "p": "yamanaka", "tel": "0565-23-2086", "m": "docs", "memo": "来週の会議に使用する資料を本日、お送りいたしました。"}}, {"no": 11, "time": "10:50", "r1": {"co": "日本ガイシ", "name": "野呂", "callee": "総務課の宮原係長", "p": "miyahara", "tel": "052-872-6151"}, "r2": {"co": "セントラルホームズ", "name": "岩田", "callee": "庶務課の森係長", "p": "mori", "tel": "052-953-8850", "m": "reschedule", "memo": "明日約束していた打ち合わせの日程を、来週の水曜日15：30に変更してもらいたい。"}}, {"no": 12, "time": "11:10", "r1": {"co": "ダイワラクダ", "name": "北林", "callee": "総務課の松田様", "p": "matsuda", "tel": "0568-52-8651"}, "r2": {"co": "モルテン", "name": "中村", "callee": "庶務課の金子様", "p": "kaneko", "tel": "052-321-2020", "m": "contact", "memo": "来週の打ち合わせの件で事前に話をしておきたいので明日の１４：００までに連絡してもらいたい。"}}, {"no": 13, "time": "11:18", "r1": {"co": "ニッポンフード", "name": "石川", "callee": "総務課の松田様", "p": "matsuda", "tel": "052-332-4129"}, "r2": {"co": "日本旅行", "name": "下村", "callee": "庶務課の金子様", "p": "kaneko", "tel": "052-211-5335", "m": "order", "memo": "先日発注した商品の数を１１０個から１４０個に変更したい。"}}, {"no": 14, "time": "11:26", "r1": {"co": "NTTデータ", "name": "古市", "callee": "総務課の秋元課長", "p": "akimoto", "tel": "052-204-4558"}, "r2": {"co": "トーマツ", "name": "岩田", "callee": "山中総務部長", "p": "yamanaka", "tel": "052-565-5518", "m": "successor", "memo": "担当者変更のため後任の担当者を紹介しに伺いたいので、都合のよい日を教えてほしい。"}}, {"no": 15, "time": "11:34", "r1": {"co": "十六銀行", "name": "夏目", "callee": "総務課の宮原係長", "p": "miyahara", "tel": "052-822-5896"}, "r2": {"co": "コンドーボー", "name": "玉村", "callee": "庶務課の森係長", "p": "mori", "tel": "0566-99-8011", "m": "docs", "memo": "来週の会議に使用する資料を本日、お送りいたしました。"}}, {"no": 16, "time": "11:42", "r1": {"co": "アイシン精機", "name": "中野", "callee": "総務課の松田様", "p": "matsuda", "tel": "0561-34-5912"}, "r2": {"co": "住友不動産", "name": "真野", "callee": "庶務課の金子様", "p": "kaneko", "tel": "052-569-5611", "m": "reschedule", "memo": "明日約束していた打ち合わせの日程を、来週の水曜日15：30に変更してもらいたい。"}}, {"no": 17, "time": "11:50", "r1": {"co": "名古屋銀行", "name": "金森", "callee": "総務課の秋元課長", "p": "akimoto", "tel": "052-891-4612"}, "r2": {"co": "東洋印刷", "name": "山口", "callee": "山中総務部長", "p": "yamanaka", "tel": "0568-69-8023", "m": "contact", "memo": "来週の打ち合わせの件で事前に話をしておきたいので、明日の１４：００までに連絡してもらいたい。"}}, {"no": 18, "time": "11:58", "r1": {"co": "名鉄観光", "name": "小島", "callee": "総務課の宮原係長", "p": "miyahara", "tel": "052-582-8401"}, "r2": {"co": "電通", "name": "篠原", "callee": "庶務課の森係長", "p": "mori", "tel": "052-459-0503", "m": "order", "memo": "先日発注した商品の数を１１０個から１４０個に変更したい。"}}, {"no": 19, "time": "12:06", "r1": {"co": "中部電力", "name": "佐々木", "callee": "総務課の松田様", "p": "matsuda", "tel": "052-269-1308"}, "r2": {"co": "東海広告", "name": "平松", "callee": "庶務課の金子様", "p": "kaneko", "tel": "052-565-5518", "m": "successor", "memo": "担当者変更のため後任の担当者を紹介しに伺いたいので、都合のよい日を教えてほしい。"}}, {"no": 20, "time": "12:14", "r1": {"co": "三菱重工", "name": "徳永", "callee": "総務課の秋元課長", "p": "akimoto", "tel": "0568-69-2113"}, "r2": {"co": "トヨタ自動車", "name": "山田", "callee": "山中総務部長", "p": "yamanaka", "tel": "0565-23-2086", "m": "docs", "memo": "来週の会議に使用する資料を本日、お送りいたしました。"}}, {"no": 21, "time": "12:22", "r1": {"co": "日本ガイシ", "name": "野呂", "callee": "総務課の宮原係長", "p": "miyahara", "tel": "052-872-6151"}, "r2": {"co": "セントラルホームズ", "name": "岩田", "callee": "庶務課の森係長", "p": "mori", "tel": "052-953-8850", "m": "reschedule", "memo": "明日約束していた打ち合わせの日程を、来週の水曜日15：30に変更してもらいたい。"}}];
+
+/* ===== 状態 ===== */
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const v = s => `<span class="v">${s}</span>`;
+const u = s => `<span class="u">${s}</span>`;
+let cur = 0, round = '1';
+const marks = {};            // marks['0-1'] = {行番号:'o'|'t'|'x'}
+const mkey = () => `${cur}-${round}`;
+const curMarks = () => (marks[mkey()] ||= {});
+
+/* ===== セリフ ===== */
+function statusLines(p, who){
+  const back = u(`${who}が戻りましたらお電話を差し上げるよう確かに申し伝えます`);
+  if (p.pattern === '1') return [u(`ただ今外出いたしております。${v(p.time)}時には戻る予定でございます`),
+    u('戻り次第こちらから、お電話を差し上げましょうか'), back];
+  if (p.pattern === '2' || p.pattern === '3'){
+    const kind = p.pattern === '2' ? '休暇中' : '出張中';
+    return [u(`${kind}でございます。${v(p.day)}日には出勤の予定でございます`),
+      u(`${v(p.day)}日にこちらから、お電話を差し上げましょうか`),
+      u(`${v(p.day)}日に${who}からお電話を差し上げるよう確かに申し伝えます`)];
+  }
+  if (p.pattern === '4') return [u('ただ今席を外しております'), u('戻り次第こちらから、お電話を差し上げましょうか'), back];
+  return [u('ただ今他の電話に出ております'), u('電話が終わり次第こちらから、お電話を差し上げましょうか'),
+    u(`電話が終わり次第${who}からお電話を差し上げるよう確かに申し伝えます`)];
+}
+
+function buildScript(){
+  const o = ORDER[cur][round === '1' ? 'r1' : 'r2'], p = PEOPLE[o.p];
+  const coIn = document.getElementById('stuCo').value.trim(), nmIn = document.getElementById('stuName').value.trim();
+  const co = v(coIn ? esc(coIn) : '【内定先企業名】'), me = v(nmIn ? esc(nmIn) : '【自分の名前】');
+  const cc = v(o.co), cn = v(o.name), tel = v(o.tel), who = v(p.name), dept = v(p.dept);
+  const myself = (p.dept === MY_DEPT ? u('同じ') : '') + MY_DEPT;
+  const R = (t, x={}) => ({s:'r', t, ...x}), C = (t, x={}) => ({s:'c', t, ...x});
+  const [absent, offer, promise] = statusLines(p, who);
+  const head = [
+    R(`「はい、${co}でございます」`),
+    C(`「私、${cc}の${cn}と申します。いつもお世話になっております」`),
+    R('「いつも（こちらこそ）お世話になっております」'),
+    C(`「恐れ入りますが、${v(o.callee)}いらっしゃいますでしょうか」`),
+    R(`「${dept}の${who}でございますね。かしこまりました。少々お待ちくださいませ」`)
+  ];
+  const opening = [
+    R('「お待たせいたしました」'),
+    R(`「申し訳ございません。あいにくではございますが、${who}は、${absent}」`),
+    R(`「お差し支えなければ、${offer}」`)
+  ];
+  if (round === '1') return {head, body:[...opening,
+    C('「それでは、申し訳ございませんがよろしくお願いいたします」'),
+    R('「かしこまりました。恐れ入りますが、念のためお電話番号をお聞かせ願えませんでしょうか」'),
+    C(`「はい、${tel}です」`),
+    R(`「かしこまりました。それでは確認させていただきます。${tel}、${cc}の${cn}様でいらっしゃいますね」`),
+    C('「はい」'),
+    R(`「私、${myself}の${me}と申します。${promise}」`),
+    C('「では、よろしくお願いいたします」'),
+    R('「失礼いたします」')]};
+  const msg = MESSAGES[o.m].build({n:who, ext:v(p.ext)});
+  const reps = msg.rep.map((r,i) => i === 0
+    ? R(`「かしこまりました。それでは確認させていただきます。${u(r)}」`, {alt:'復唱例'})
+    : R(`「${u(r)}」`, {alt:'または'}));
+  return {head, body:[...opening,
+    C('「それでは、申し訳ございませんが伝言をお願いできますか」'),
+    R('「かしこまりました。お願いいたします」'),
+    ...msg.call.map(t => C(t, {msg:true})),
+    ...reps,
+    C('「はい、結構です」'),
+    R(`「${cc}の${cn}様でいらっしゃいますね」`),
+    C('「はい」'),
+    R(`「私、${myself}の${me}と申します。${u(`確かに${who}へ申し伝えます`)}」`),
+    C('「では、よろしくお願いいたします」'),
+    R('「失礼いたします」')]};
+}
+
+const MK = [['o','○'],['t','△'],['x','×']];
+let rc = 0;
+function rowHTML(l){
+  const alt = l.alt ? `<span class="alt">${l.alt}</span>` : '';
+  if (l.s === 'r'){
+    const i = rc++, m = curMarks()[i];
+    return `<div class="row recv ${m ? 'm-' + m : ''}" data-row="${i}"><div class="cell c1"><span class="tag">受ける側</span>${alt}${l.t}</div>
+      <div class="cell cm"><div class="marks">${MK.map(([k,s]) => `<button type="button" class="mk mk-${k}" data-i="${i}" data-k="${k}" aria-pressed="${m===k}" aria-label="${s}">${s}</button>`).join('')}</div></div>
+      <div class="cell c2"></div></div>`;
+  }
+  return `<div class="row call ${l.msg ? 'msg' : ''}"><div class="cell c1"></div><div class="cell cm"></div><div class="cell c2"><span class="tag">かける側</span>${l.t}</div></div>`;
+}
+function tally(){
+  const m = curMarks(), total = document.querySelectorAll('.row.recv').length;
+  const n = k => Object.values(m).filter(x => x === k).length;
+  document.getElementById('tally').innerHTML = `<span class="tk o">○ ${n('o')}</span><span class="tk t">△ ${n('t')}</span><span class="tk x">× ${n('x')}</span><span class="tk">未採点 ${total - Object.keys(m).length}</span>`;
+}
+
+/* ===== 画面 ===== */
+function renderGrid(){
+  document.getElementById('nogrid').innerHTML = ORDER.map((o,i) => {
+    const done = marks[`${i}-1`] && Object.keys(marks[`${i}-1`]).length && marks[`${i}-2`] && Object.keys(marks[`${i}-2`]).length;
+    return `<button type="button" class="nobtn ${done ? 'done' : ''}" data-i="${i}" aria-current="${i===cur}"><b>${o.no}番目</b><small>${o.time}</small></button>`;
+  }).join('');
+  document.querySelectorAll('.nobtn').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.i))));
+}
+function go(i){
+  if (i < 0 || i >= ORDER.length) return;
+  if (i !== cur) document.getElementById('stuName').value = '';
+  cur = i; round = '1'; renderGrid(); render();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function render(){
+  const ord = ORDER[cur], o = ord[round === '1' ? 'r1' : 'r2'], p = PEOPLE[o.p], r2 = round === '2';
+  const label = p.name + (p.title || 'さん');
+  const sc = buildScript(); rc = 0;
+  const rows = sc.head.map(rowHTML).join('') + '<div class="hold">保留</div>' + sc.body.map(rowHTML).join('');
+  const checks = [...p.checks,
+    ...(r2 ? ['伝言の内容（日時・数字）を正しく復唱できているか','相手の会社名と名前を確認できているか']
+           : ['電話番号・会社名・名前を正しく復唱できているか']),
+    `社外に対して「${label}」と呼ばず、「${p.name}」と言えているか`];
+  if (p.dept === MY_DEPT) checks.push(`同じ課なので「同じ${MY_DEPT}の〜」と名乗れているか`);
+
+  document.getElementById('main').innerHTML = `
+    <div class="nav">
+      <h2 class="now">${ord.no}番目<small>${ord.time}</small></h2>
+      <span class="sp"></span>
+      <button class="btn" id="prev" type="button" ${cur===0?'disabled':''}>← 前へ</button>
+      <button class="btn" id="next" type="button" ${cur===ORDER.length-1?'disabled':''}>次へ →</button>
+    </div>
+    <div class="seg round" id="roundSeg" role="group" aria-label="実技の回">
+      <button type="button" data-r="1" aria-pressed="${!r2}">1回目<small>折り返しを頼む</small></button>
+      <button type="button" data-r="2" aria-pressed="${r2}">2回目<small>伝言を頼む</small></button>
+    </div>
+    <section class="callcard" aria-label="かける側の情報">
+      <dl>
+        <div><dt>かける側の会社名</dt><dd>${o.co}</dd></div>
+        <div><dt>かける側の名前</dt><dd>${o.name}</dd></div>
+        ${r2 ? '' : `<div><dt>電話番号</dt><dd>${o.tel}</dd></div>`}
+      </dl>
+    </section>
+    <section class="panel status">
+      <div class="head">
+        <h2 class="who">${p.dept}　${label}</h2>
+        <span class="badge">${PATTERN_NAME[p.pattern]}</span>
+        ${r2 ? `<span class="badge msg">伝言：${MESSAGES[o.m].title}</span>` : ''}
+      </div>
+      <p class="sit">状況：${p.status}</p>
+      ${r2 ? `<p class="memo">伝言の元の内容：${esc(o.memo)}</p>` : ''}
+      <ul class="checks">${checks.map(x=>`<li>${x}</li>`).join('')}</ul>
+    </section>
+    <div class="legend"><span><span class="u">赤い下線</span>…状況によって変わる大事な部分</span><span>色の濃い列…かける側のセリフ</span></div>
+    <div class="tallybar"><div id="tally" class="tally"></div><button class="btn" id="markReset" type="button">この回の採点をリセット</button></div>
+    <section class="script t" aria-label="セリフ">
+      <div class="cols"><div>受ける側</div><div>採点</div><div>かける側</div></div>
+      ${rows}
+    </section>`;
+
+  tally();
+  document.getElementById('prev').addEventListener('click', () => go(cur - 1));
+  document.getElementById('next').addEventListener('click', () => go(cur + 1));
+  document.querySelectorAll('#roundSeg button').forEach(b => b.addEventListener('click', () => { round = b.dataset.r; render(); }));
+  document.getElementById('markReset').addEventListener('click', () => { marks[mkey()] = {}; render(); renderGrid(); });
+  document.querySelectorAll('.mk').forEach(b => b.addEventListener('click', () => {
+    const m = curMarks(), i = b.dataset.i, k = b.dataset.k;
+    if (m[i] === k) delete m[i]; else m[i] = k;
+    const row = document.querySelector(`.row[data-row="${i}"]`);
+    row.classList.remove('m-o','m-t','m-x'); if (m[i]) row.classList.add('m-' + m[i]);
+    row.querySelectorAll('.mk').forEach(x => x.setAttribute('aria-pressed', m[i] === x.dataset.k));
+    tally(); renderGrid();
+  }));
+}
+['stuCo','stuName'].forEach(id => document.getElementById(id).addEventListener('input', render));
+renderGrid(); render();
+</script>
+</body>
+</html>
